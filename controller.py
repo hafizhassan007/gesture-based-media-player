@@ -2,10 +2,6 @@
 controller.py
 -------------
 Translates a confirmed gesture into an OS-level keyboard event.
-
-Uses pyautogui so it works with VLC, PowerPoint, browsers, etc.
-A per-gesture cooldown prevents the same action from firing on every
-frame while the hand is still held in the trigger pose.
 """
 
 from __future__ import annotations
@@ -17,9 +13,6 @@ import pyautogui
 
 from config import FAST_GESTURES, RuntimeSettings
 
-
-# pyautogui safety: disable the fail-safe corner so a user accidentally
-# moving the mouse to (0,0) does not crash the app mid-demo.
 pyautogui.FAILSAFE = False
 
 
@@ -33,6 +26,7 @@ class GestureController:
 
     # ------------------------------------------------------------------ #
     def _cooldown_for(self, gesture: str) -> float:
+        """Return cooldown depending on gesture type."""
         if gesture in FAST_GESTURES:
             return self.settings.fast_cooldown
         return self.settings.cooldown
@@ -42,11 +36,16 @@ class GestureController:
         """
         Fire the keyboard shortcut bound to *gesture*.
 
-        Returns the key that was pressed (for logging), or None if the
-        gesture was suppressed by the cooldown / has no binding.
+        Returns pressed key or None if suppressed.
         """
         now = time.time()
-        if now - self._last_action_time < self._cooldown_for(gesture):
+        cooldown = self._cooldown_for(gesture)
+
+        # 🚀 NEW: prevent repeating same gesture too fast
+        if (
+            gesture == self._last_gesture
+            and now - self._last_action_time < cooldown
+        ):
             return None
 
         key = self.settings.key_for(gesture)
@@ -55,7 +54,7 @@ class GestureController:
 
         try:
             pyautogui.press(key)
-        except Exception as exc:  # pragma: no cover  - hardware/OS variance
+        except Exception as exc:  # pragma: no cover
             print(f"[controller] key press failed: {exc}")
             return None
 

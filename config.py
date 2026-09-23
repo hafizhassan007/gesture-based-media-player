@@ -9,39 +9,58 @@ import os
 from dataclasses import dataclass
 from typing import Dict, Tuple
 
-# Paths
+# ==================== PATHS ====================
+
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(PROJECT_ROOT, "hand_landmarker.task")
 LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
 
-# Camera
+# ==================== CAMERA ====================
+
 CAMERA_INDEX = 0
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
 FLIP_HORIZONTAL = True
 
-# Detection settings
+# ==================== DETECTION SETTINGS ====================
+
 HISTORY_LENGTH = 8
 CONFIRM_THRESHOLD = 3
+
 COOLDOWN_DEFAULT = 0.60
 COOLDOWN_FAST = 0.15
-FAST_GESTURES: Tuple[str, ...] = ("VOL_UP", "VOL_DOWN")
 
-# Gesture mappings
+# Fast-trigger gestures (reduced cooldown)
+FAST_GESTURES: Tuple[str, ...] = (
+    "VOL_UP",
+    "VOL_DOWN",
+    "SWIPE_LEFT",
+    "SWIPE_RIGHT",
+)
+
+# ==================== GESTURE MAPPINGS ====================
+
+# Static finger-based gestures
 GESTURE_FINGER_MAP: Dict[Tuple[int, int, int, int, int], str] = {
     (1, 0, 0, 0, 0): "PLAY_PAUSE",
-    (1, 1, 1, 1, 0): "STOP",
+    (0, 1, 1, 1, 1): "STOP",
     (0, 0, 0, 0, 0): "MUTE",
-    (1, 1, 1, 1, 1): "FULLSCREEN",
+    (1, 0, 0, 0, 1): "FULLSCREEN",
     (0, 1, 0, 0, 0): "VOL_UP",
     (0, 0, 0, 0, 1): "VOL_DOWN",
     (0, 1, 1, 0, 0): "FORWARD",
     (0, 0, 1, 1, 1): "BACKWARD",
-    (0, 1, 1, 1, 0): "NEXT",
-    (0, 1, 1, 1, 1): "PREVIOUS",
     (1, 1, 1, 0, 0): "SPEED_UP",
     (1, 1, 0, 0, 0): "SPEED_DOWN",
 }
+
+# Motion-based gestures (swipes)
+GESTURE_MOTION_MAP: Dict[str, str] = {
+    "SWIPE_LEFT": "PREVIOUS",
+    "SWIPE_RIGHT": "NEXT",
+}
+
+# ==================== ACTION MAPPING ====================
 
 MEDIA_MODE_ACTIONS: Dict[str, str] = {
     "PLAY_PAUSE": "space",
@@ -56,7 +75,13 @@ MEDIA_MODE_ACTIONS: Dict[str, str] = {
     "PREVIOUS": "p",
     "SPEED_UP": "]",
     "SPEED_DOWN": "[",
+
+    # Swipe gestures (direct mapping)
+    "SWIPE_LEFT": "p",
+    "SWIPE_RIGHT": "n",
 }
+
+# ==================== LABELS ====================
 
 GESTURE_LABELS: Dict[str, str] = {
     "PLAY_PAUSE": "Play / Pause",
@@ -71,8 +96,13 @@ GESTURE_LABELS: Dict[str, str] = {
     "PREVIOUS": "Previous",
     "SPEED_UP": "Speed Up",
     "SPEED_DOWN": "Speed Down",
+
+    # Swipe labels
+    "SWIPE_LEFT": "Swipe Left → Previous",
+    "SWIPE_RIGHT": "Swipe Right → Next",
 }
 
+# ==================== RUNTIME SETTINGS ====================
 
 @dataclass
 class RuntimeSettings:
@@ -85,7 +115,6 @@ class RuntimeSettings:
 
     def key_for(self, gesture: str) -> str:
         return MEDIA_MODE_ACTIONS.get(gesture, "")
-
 
 # ==================== MODERN DARK THEME ====================
 APP_STYLESHEET = """

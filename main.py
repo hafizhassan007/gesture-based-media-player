@@ -15,7 +15,7 @@ import sys
 from config import MODEL_PATH
 
 
-def _check_prerequisites() -> None:
+def _check_files() -> None:
     """Fail loudly if the MediaPipe model file is missing."""
     if not os.path.isfile(MODEL_PATH):
         sys.stderr.write(
@@ -27,7 +27,7 @@ def _check_prerequisites() -> None:
 
 
 def main() -> int:
-    _check_prerequisites()
+    _check_files()
 
     try:
         # Lazy import to avoid heavy startup cost

@@ -34,17 +34,20 @@ Finger order is `[Thumb, Index, Middle, Ring, Pinky]` (1 = up, 0 = down).
 | Fingers           | Gesture        | Media Mode (VLC) | Presentation Mode |
 |-------------------|----------------|------------------|-------------------|
 | `1 0 0 0 0`       | Play / Pause   | `space`          | `f5`              |
-| `1 1 1 1 0`       | Stop           | `s`              | `escape`          |
+| `0 1 1 1 1`       | Stop           | `s`              | `escape`          |
 | `0 0 0 0 0`       | Mute           | `m`              | `b` (blank)       |
-| `1 1 1 1 1`       | Fullscreen     | `f`              | `f5`              |
+| `1 0 0 0 1`       | Fullscreen     | `f`              | `f5`              |
 | `0 1 0 0 0`       | Volume Up      | `up`             | `up`              |
 | `0 0 0 0 1`       | Volume Down    | `down`           | `down`            |
 | `0 1 1 0 0`       | Forward        | `right`          | `right` (next)    |
-| `0 1 0 0 1`       | Backward       | `left`           | `left` (prev)     |
-| `0 1 1 1 0`       | Next track     | `n`              | `right`           |
-| `0 1 1 1 1`       | Previous track | `p`              | `left`            |
+| `0 0 1 1 1`       | Backward       | `left`           | `left` (prev)     |
+| `1 1 1 1 1 + SR`  | Next track     | `n`              | `right`           |
+| `1 1 1 1 1 +SL`   | Previous track | `p`              | `left`            |
 | `1 1 1 0 0`       | Speed Up       | `]`              | `pageup`          |
 | `1 1 0 0 0`       | Speed Down     | `[`              | `pagedown`        |
+
+SR = swipe right
+SL = swipe left
 
 All bindings can be customised by editing `config.py`.
 
