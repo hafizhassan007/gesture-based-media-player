@@ -12,13 +12,15 @@ Public surface (do NOT rename — main.py imports run_app):
 from __future__ import annotations
 
 import os
+import shutil
+import subprocess
 from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
 
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QFont, QImage, QPixmap
+from PyQt5.QtCore import QSize, Qt, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtGui import QColor, QFont, QIcon, QImage, QPainter, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -30,6 +32,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QStyle,
     QSizePolicy,
     QSlider,
     QStatusBar,
@@ -289,10 +292,27 @@ class MainWindow(QMainWindow):
         self.btn_start.setFixedHeight(28)
         self.btn_stop = QPushButton("Stop Detection")
         self.btn_stop.setFixedHeight(28)
+        self.btn_vlc = QPushButton()
+        vlc_icon = self.style().standardIcon(QStyle.SP_MediaPlay)
+        vlc_pixmap = vlc_icon.pixmap(23, 23)
+        tinted_pixmap = QPixmap(vlc_pixmap.size())
+        tinted_pixmap.fill(Qt.transparent)
+        painter = QPainter(tinted_pixmap)
+        painter.drawPixmap(0, 0, vlc_pixmap)
+        painter.setCompositionMode(QPainter.CompositionMode_SourceIn)
+        painter.fillRect(tinted_pixmap.rect(), QColor("#e8eaee"))
+        painter.end()
+        self.btn_vlc.setIcon(QIcon(tinted_pixmap))
+        self.btn_vlc.setIconSize(QSize(23, 23))
+        self.btn_vlc.setToolTip("Open VLC media player")
+        self.btn_vlc.setFixedSize(36, 30)
+        self.btn_vlc.setStyleSheet("QPushButton { padding: 0px; }")
         self.btn_start.clicked.connect(self._on_start_clicked)
         self.btn_stop.clicked.connect(self._on_stop_clicked)
+        self.btn_vlc.clicked.connect(self._on_vlc_clicked)
         btn_row.addWidget(self.btn_start)
         btn_row.addWidget(self.btn_stop)
+        btn_row.addWidget(self.btn_vlc)
         layout.addLayout(btn_row)
 
         return card
@@ -380,6 +400,26 @@ class MainWindow(QMainWindow):
         self.lbl_state.setText("Idle")
         self.statusBar().showMessage("Detection paused.")
         self._refresh_buttons()
+
+    def _on_vlc_clicked(self) -> None:
+        vlc_path = shutil.which("vlc")
+        if vlc_path is None and os.name == "nt":
+            for root in (os.environ.get("ProgramFiles"), os.environ.get("ProgramFiles(x86)")):
+                if root:
+                    candidate = os.path.join(root, "VideoLAN", "VLC", "vlc.exe")
+                    if os.path.isfile(candidate):
+                        vlc_path = candidate
+                        break
+
+        if vlc_path is None:
+            QMessageBox.warning(self, "VLC not found", "Install VLC or add it to PATH.")
+            return
+
+        try:
+            subprocess.Popen([vlc_path], close_fds=True)
+            self.statusBar().showMessage("VLC launched.")
+        except OSError as exc:
+            QMessageBox.critical(self, "Could not launch VLC", str(exc))
 
     def _on_sensitivity_changed(self, value: int) -> None:
         cooldown = round(value / 100.0, 2)
