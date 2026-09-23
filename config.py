@@ -42,7 +42,7 @@ FAST_GESTURES: Tuple[str, ...] = (
 
 # Static finger-based gestures
 GESTURE_FINGER_MAP: Dict[Tuple[int, int, int, int, int], str] = {
-    (1, 0, 0, 0, 1): "PLAY_PAUSE",
+    (1, 0, 0, 0, 0): "PLAY_PAUSE",
     (0, 1, 1, 1, 1): "STOP",
     (0, 0, 0, 0, 0): "MUTE",
     (1, 0, 0, 0, 1): "FULLSCREEN",
